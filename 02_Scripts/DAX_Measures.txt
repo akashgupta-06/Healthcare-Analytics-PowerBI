@@ -1,0 +1,61 @@
+/* ==================================================
+1. CALENDAR TABLE 
+Purpose: Enables time-intelligence and consistent date filtering.
+==================================================
+*/
+
+Calendar = 
+VAR MinDate = MIN('Healthcare Dataset'[Date of Admission])
+VAR MaxDate = MAX('Healthcare Dataset'[Discharge Date])
+RETURN
+ADDCOLUMNS (
+    CALENDAR (MinDate, MaxDate),
+    "Year", YEAR([Date]),
+    "Month", FORMAT([Date], "MMMM"),
+    "Month Number", MONTH([Date]),
+    "Quarter", "Q" & FORMAT([Date], "Q"),
+    "Weekday", FORMAT([Date], "dddd")
+)
+
+
+
+/* ==================================================
+2. KEY BUSINESS METRICS
+Purpose: Core KPIs for the Executive Overview page.
+==================================================
+*/
+
+// Total volume of patients
+Total Admissions = COUNTROWS('Healthcare Dataset')
+
+// Gross hospital billing
+Total Revenue = SUM('Healthcare Dataset'[Billing Amount])
+
+// Efficiency metric: Average days per stay
+Avg Length of Stay = AVERAGE('Healthcare Dataset'[Length of Stay])
+
+// Operational metric: Percentage of Emergency visits
+ER Admission Rate = 
+DIVIDE(
+    CALCULATE([Total Admissions], 'Healthcare Dataset'[Admission Type] = "Emergency"),
+    [Total Admissions],
+    0
+)
+
+
+
+/* ==================================================
+3. CLINICAL & RISK METRICS
+Purpose: Identifying high-risk patients and test results.
+==================================================
+*/
+
+// Count of patients with abnormal results
+Abnormal Results Count = 
+CALCULATE(
+    [Total Admissions], 
+    'Healthcare Dataset'[Test Results] = "Abnormal"
+)
+
+// Dynamic Label for Chart Titles (Optional Pro-Tip)
+Chart Title Dynamic = "Abnormal Results: " & [Abnormal Results Count]
